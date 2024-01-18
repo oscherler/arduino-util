@@ -27,10 +27,11 @@ find_board()
 	_num_devs="${#_devs[@]}"
 
 	if [[ "$_num_devs" -eq 0 ]]; then
-		printf "No device matching '%s' found.\n" "$_regex" >&2
+		printf "No device matching '%s' found in /dev/.\n" "$_regex" >&2
 		exit 1
 	elif [[ "$_num_devs" -gt 1 ]]; then
-		printf "More than one device matching '%s' found.\n" "$_regex" >&2
+		printf "More than one device matching '%s' found in /dev/:\n" "$_regex" >&2
+		printf "%s\n" "${_devs[@]}" >&2
 		exit 1
 	else
 		echo "/dev/${_devs[0]}"
