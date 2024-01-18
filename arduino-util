@@ -5,11 +5,13 @@ usage()
 	cat << "EOL"
 Usage:
     arduino-util find-board device_regex
+      Find the port on which the Arduino is available.
 
-    device_regex: regex that the serial port in /dev must match.
+      device_regex: regex that the serial port in /dev must match.
 
 EXAMPLES
 
+    # Find an Arduino named /dev/cu.usbserial
     arduino-util find-board "cu\.usb(serial|modem)"
 EOL
 }
