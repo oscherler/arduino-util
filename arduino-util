@@ -1,0 +1,61 @@
+#!/bin/bash
+
+usage()
+{
+	cat << "EOL"
+Usage:
+    arduino-util find-board device_regex
+
+    device_regex: regex that the serial port in /dev must match.
+
+EXAMPLES
+
+    arduino-util find-board "cu\.usb(serial|modem)"
+EOL
+}
+
+find_board()
+{
+	_regex="$1"
+	shift
+
+	# shellcheck disable=SC2010
+	_found="$( ls -1 /dev | grep -E "${_regex}" | tr $'\n' ' ' )"
+	IFS=" " read -r -a _devs <<< "$_found"
+	_num_devs="${#_devs[@]}"
+
+	if [[ "$_num_devs" -eq 0 ]]; then
+		printf "No device matching '%s' found.\n" "$_regex" >&2
+		exit 1
+	elif [[ "$_num_devs" -gt 1 ]]; then
+		printf "More than one device matching '%s' found.\n" "$_regex" >&2
+		exit 1
+	else
+		echo "/dev/${_devs[0]}"
+	fi
+}
+
+main()
+{
+	if [[ $# -lt 1 ]]; then
+		usage
+		exit 1
+	fi
+
+	_cmd="$1"
+	shift
+
+	if [[ "$_cmd" == 'find-board' ]]; then
+		if [[ $# -lt 1 ]]; then
+			usage
+			exit 1
+		fi
+
+		find_board "$1"
+	else
+		usage
+		exit 1
+	fi
+}
+
+main "$@"
