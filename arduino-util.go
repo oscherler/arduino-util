@@ -33,7 +33,9 @@ func main() {
 }
 
 func usage() {
-	fmt.Println("Usage")
+	fmt.Println("Available commands:")
+	fmt.Println("  makefile:     Output a Makefile suitable for building a project with local libraries.")
+	fmt.Println("  find-board:   Find a connected Arduino based on a regexp.")
 	os.Exit( 1 )
 }
 
