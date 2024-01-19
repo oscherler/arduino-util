@@ -4,7 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	_ "embed"
+	"text/template"
 )
+
+//go:embed Makefile.tmpl
+var makefileTemplate string
 
 func main() {
 
@@ -14,7 +20,7 @@ func main() {
 	
 	switch os.Args[1] {
 		case "makefile":
-			makefile( os.Args[2:] )
+			makefile( filepath.Base( os.Args[0] ), os.Args[2:] )
 		case "find-board":
 			findBoard( os.Args[2:] )
 		default:
@@ -27,11 +33,13 @@ func usage() {
 	os.Exit( 1 )
 }
 
-func makefile( args []string ) {
+func makefile( executable string, args []string ) {
 	makefileCommand := flag.NewFlagSet( "makefile", flag.ExitOnError )
 
 	makefileCommand.Parse( args )
-	fmt.Println("makefile")
+	tpl := template.Must( template.New("makefile").Parse( makefileTemplate ) )
+
+	tpl.Execute( os.Stdout, struct { Executable string }{ executable } )
 }
 
 func findBoard( args []string ) {
