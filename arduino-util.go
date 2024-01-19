@@ -98,7 +98,7 @@ func findOneMatchingDevice( entries []fs.DirEntry, re regexp.Regexp ) ( string, 
 		return "", errors.New( message )
 	}
 	
-	return boards[0], nil
+	return "/dev/" + boards[0], nil
 }
 
 func isDevice( entry fs.DirEntry ) bool {
