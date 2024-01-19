@@ -1,15 +1,15 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"flag"
-	"strings"
 	"fmt"
-	"regexp"
-	"os"
 	"io/fs"
+	"os"
 	"path/filepath"
-	_ "embed"
+	"regexp"
+	"strings"
 	"text/template"
 )
 
