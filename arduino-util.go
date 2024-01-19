@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"strings"
 	"fmt"
@@ -53,37 +54,47 @@ func findBoard( args []string ) {
 		"regex that matches the name the board appears under in /dev/" )
 
 	findBoardCommand.Parse( args )
-	c, err := os.ReadDir("/dev")
-
-	if err != nil {
-		fmt.Println( err )
-		os.Exit( 1 )
-	}
 
 	re, err := regexp.Compile( *findBoardRegex )
+	check( err )
 
+	entries, err := os.ReadDir("/dev")
+	check( err )
+
+	board, err := findOneMatchingDevice( entries, *re )
+	check( err )
+
+	fmt.Println( board )
+}
+
+func check( err error ) {
 	if err != nil {
-		fmt.Println( err )
+		fmt.Fprintln( os.Stderr, err )
 		os.Exit( 1 )
 	}
+}
+
+func findOneMatchingDevice( entries []fs.DirEntry, re regexp.Regexp ) ( string, error ) {
 
 	var boards []string
 	
-	for _, entry := range( c ) {
+	for _, entry := range( entries ) {
 		if isDevice( entry ) && re.MatchString( entry.Name() ) {
 			boards = append( boards, entry.Name() )
 		}
 	}
 
 	if len( boards ) == 0 {
-		fmt.Fprintf( os.Stderr, "No device matching '%s' found in /dev/.\n", *findBoardRegex )
-		os.Exit( 1 )
+		message := fmt.Sprintf( "No device matching '%v' found in /dev/.", re.String() )
+
+		return "", errors.New( message )
 	} else if len( boards ) > 1 {
-		fmt.Fprintf( os.Stderr, "More than one device matching '%s' found in /dev/:\n  %v\n", *findBoardRegex, strings.Join( boards, "\n  " ) )
-		os.Exit( 1 )
-	} else {
-		fmt.Println( boards[0] )
+		message := fmt.Sprintf( "More than one device matching '%v' found in /dev/:\n  %v", re.String(), strings.Join( boards, "\n  " ) )
+
+		return "", errors.New( message )
 	}
+	
+	return boards[0], nil
 }
 
 func isDevice( entry fs.DirEntry ) bool {
