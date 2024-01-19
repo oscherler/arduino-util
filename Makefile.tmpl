@@ -9,8 +9,9 @@ BUILD_PATH = build
 BOARD_FQBN = # e.g. arduino:avr:nano
 BOARD_OPTIONS = # e.g. cpu=atmega328old
 
-# Adapt this regex to match the range of names your Arduino might appear in /dev/.
-PORT_REGEX = cu\.usb(modem|serial)
+# Adapt this regex to match the range of names your Arduino might appear in /dev/,
+# or leave empty for the default: {{ .DefaultRegex }}
+PORT_REGEX = 
 BAUD_RATE = 115200
 
 ### End of configuration ###
@@ -26,13 +27,17 @@ UPLOAD_OPTS = \
 	--board-options "$(BOARD_OPTIONS)" \
 	--input-dir "$(BUILD_PATH)"
 
-PORT = $(shell {{ .Executable }} find-board "$(PORT_REGEX)")
+PORT_ARG = $(if $(PORT_REGEX),-regex '$(PORT_REGEX)',)
 
 compile:
 	arduino-cli compile $(COMPILE_OPTS)
 
-upload:
+find-board:
+	$(eval PORT := $(shell {{ .Executable }} find-board $(PORT_ARG)))
+	$(if $(PORT),,$(error "Stopping"))
+
+upload: find-board
 	arduino-cli upload $(UPLOAD_OPTS) --port "$(PORT)"
 
-monitor:
+monitor: find-board
 	arduino-cli monitor --config baudrate=$(BAUD_RATE) --port "$(PORT)"

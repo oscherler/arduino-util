@@ -13,6 +13,8 @@ import (
 	"text/template"
 )
 
+const DefaultPortRegex = "cu\\.usb(serial|modem)"
+
 //go:embed Makefile.tmpl
 var makefileTemplate string
 
@@ -45,14 +47,14 @@ func makefile( executable string, args []string ) {
 	makefileCommand.Parse( args )
 	tpl := template.Must( template.New("makefile").Parse( makefileTemplate ) )
 
-	tpl.Execute( os.Stdout, struct { Executable string }{ executable } )
+	tpl.Execute( os.Stdout, struct { Executable string; DefaultRegex string }{ executable, DefaultPortRegex } )
 }
 
 func findBoard( args []string ) {
 	findBoardCommand := flag.NewFlagSet( "find-board", flag.ExitOnError )
 	findBoardRegex := findBoardCommand.String(
 		"regex",
-		"cu\\.usb(serial|modem)",
+		DefaultPortRegex,
 		"regex that matches the name the board appears under in /dev/" )
 
 	findBoardCommand.Parse( args )
